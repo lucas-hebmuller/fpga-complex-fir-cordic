@@ -1,3 +1,6 @@
+#ifndef FIR_H
+#define FIR_H
+
 #include <ap_fixed.h>
 #include <ap_int.h>
 #include <hls_math.h>
@@ -20,3 +23,5 @@ void fir(int input_real, int input_img, int kernel_real[KERNEL_SIZE], int kernel
 
 void top_cordic_rotater(hls::stream<int>& input_img, hls::stream<int>& input_real, float* output_real, 
     float* output_img, int length);
+
+#endif

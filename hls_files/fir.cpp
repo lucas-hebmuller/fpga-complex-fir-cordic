@@ -1,4 +1,5 @@
 #include "fir.h"
+#include "cordic.h"
 
 
 void fpga417_fir(int* input_real, int* input_img, int* kernel_real, int* kernel_img, float* output_img, 
@@ -87,4 +88,26 @@ void fir(int input_real, int input_img, int kernel_real[KERNEL_SIZE], int kernel
 
     *output_real = acc_real;
     *output_img = acc_img;
+}
+
+void top_cordic_rotater(hls::stream<int>& input_img, hls::stream<int>& input_real, float* output_real, 
+    float* output_img, int length)
+{
+    LOOP_CORDIC_MAIN: for (int i = 0; i < length; i++) {
+        int temp_result_real;
+        int temp_result_img;
+
+        input_img.read();
+        input_real;
+
+        // convert current readed img and real to FIXED_POINT TYPE
+
+        cordic_rotator(FIXED_POINT theta, FIXED_POINT *sin, FIXED_POINT *cos)
+
+        //convert phase and magnitude from FIXED_POINT back to float;
+
+        //write back to top interface float* phase float* magnitude
+        output_img.write(temp_result_img);
+        output_real.write(temp_result_real);
+    }
 }
