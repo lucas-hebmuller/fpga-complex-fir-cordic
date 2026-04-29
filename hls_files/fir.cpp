@@ -1,7 +1,6 @@
 #include "fir.h"
 #include "cordic.h"
 
-
 void fpga417_fir(int* input_real, int* input_img, int* kernel_real, int* kernel_img, float* output_img, 
     float* output_real, int input_length) 
 {
@@ -32,7 +31,6 @@ void fpga417_fir(int* input_real, int* input_img, int* kernel_real, int* kernel_
     top_cordic_rotater(img_stream, real_stream, output_real, output_img, input_length);
 }
 
-
 void top_fir(int* input_real, int* input_img, int kernel_real[KERNEL_SIZE], int kernel_img[KERNEL_SIZE],
      hls::stream<int>&output_img, hls::stream<int>&output_real, int length) 
 {
@@ -52,7 +50,6 @@ void top_fir(int* input_real, int* input_img, int kernel_real[KERNEL_SIZE], int 
         output_real.write(temp_result_real);
     }
 }
-
 
 void fir(int input_real, int input_img, int kernel_real[KERNEL_SIZE], int kernel_img[KERNEL_SIZE], 
     int* output_real, int* output_img) 
@@ -82,6 +79,7 @@ void fir(int input_real, int input_img, int kernel_real[KERNEL_SIZE], int kernel
 
         acc_real += shift_reg_real[i] * kernel_real[i]
                     - shift_reg_img[i] * kernel_img[i];
+                    
         acc_img += shift_reg_real[i] * kernel_img[i]
                     + shift_reg_img[i] * kernel_real[i];
     }
@@ -94,20 +92,26 @@ void top_cordic_rotater(hls::stream<int>& input_img, hls::stream<int>& input_rea
     float* output_img, int length)
 {
     LOOP_CORDIC_MAIN: for (int i = 0; i < length; i++) {
-        int temp_result_real;
-        int temp_result_img;
-
-        input_img.read();
-        input_real;
+        // read from FIFO
+        int temp_result_real = input_real.read();
+        int temp_result_img = input_img.read();
 
         // convert current readed img and real to FIXED_POINT TYPE
+        FIXED_POINT real_fixed = (FIXED_POINT)temp_result_real;
+        FIXED_POINT img_fixed = (FIXED_POINT)temp_result_img;
 
-        cordic_rotator(FIXED_POINT theta, FIXED_POINT *sin, FIXED_POINT *cos)
+        // magnitude and degree/phase to be found
+        FIXED_POINT magnitude_fixed;
+        FIXED_POINT phase_fixed;
 
-        //convert phase and magnitude from FIXED_POINT back to float;
+        cordic_rotator(real_fixed, img_fixed, &magnitude_fixed, &phase_fixed);
+
+        //convert phase and magnitude from FIXED_POINT back to float
+        float magnitude_float = magnitude_fixed.to_float();
+        float phase_float = phase_fixed.to_float();
 
         //write back to top interface float* phase float* magnitude
-        output_img.write(temp_result_img);
-        output_real.write(temp_result_real);
+        output_real[i] = magnitude_float;
+        output_img[i] = phase_float;
     }
 }

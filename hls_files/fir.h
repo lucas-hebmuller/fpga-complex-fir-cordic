@@ -2,15 +2,11 @@
 #define FIR_H
 
 #include <ap_fixed.h>
-#include <ap_int.h>
-#include <hls_math.h>
 #include <hls_stream.h>
 
 const int KERNEL_SIZE = 25;
 
-// define any additional data types such as ap_fixed over here
 typedef ap_fixed<32,20> FIXED_POINT;
-
 
 void fpga417_fir(int* input_real, int* input_img, int* kernel_real, int* kernel_img, float* output_img, 
     float* output_real, int input_length);

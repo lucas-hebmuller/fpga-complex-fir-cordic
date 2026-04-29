@@ -19,58 +19,26 @@ static FIXED_POINT cordic_phase[64] =
 
 const int NUM_ITERATIONS=15;
 
-void cordic_rotator(FIXED_POINT theta, FIXED_POINT *sin, FIXED_POINT* cos)
+void cordic_rotator(FIXED_POINT cos, FIXED_POINT sin, FIXED_POINT* magnitude, FIXED_POINT* phase)
 {
+	FIXED_POINT current_cos = cos; 		// real part
+	FIXED_POINT current_sin = sin; 		// imaginary part
+	FIXED_POINT current_theta = 0;
+	FIXED_POINT scaling_factor = 0.60725;
 
-  FIXED_POINT current_cos = cos;        //x should be 1
-  FIXED_POINT current_sin = sin;        //y should be 0
-  FIXED_POINT current_theta = theta;    
-  current_cos=0.60735;//1/CORDIC_GAIN 1/1.68....
-  current_sin=0.0;
-
-/*bring any theta angle >1/2 pi or <0 back to the 0 to 1/2 pi
- *  >2pi divide 2pi
- *
- *
- */
-
-current_theta=theta;
-
-for	(int i=0;i<NUM_ITERATIONS;i++)
-{
-
-	//
-	FIXED_POINT cos_shift=current_cos>>i;
-	FIXED_POINT sin_shift=current_sin>>i;
-
-	if(current_theta>=0)
-	{
-		//counter clockwise rotating
-		current_cos=current_cos-sin_shift;
-		current_sin=current_sin+cos_shift;
-
-
-		//update the current_theta;
-		current_theta=current_theta-cordic_phase[i];
+	// rotate to 1st quadrant if not in 1st or 4th quadrant
+	if (current_cos < 0 && current_sin > 0) {
+		// currently in 2nd quadrant, need to rotate 90 degrees counterclockwise
+		FIXED_POINT temp = current_cos;
+		current_cos = -current_sin; 	// x = -y
+		current_sin = current_cos;		// y = x
+	}
+	else if (current_cos < 0 && current_sin < 0) {
+		// currently in 3rd quadrant, need to rotate 180 degress counterclokwise
+		current_cos = -current_cos;
+		current_sin = -current_sin;
 	}
 
-	else
-	{
-		//clockwise rotating
-		//update the current_theta;
-		current_cos=current_cos+sin_shift;
-		current_sin=current_sin-cos_shift;
 
-		current_theta=current_theta+cordic_phase[i];
-
-	}
-
+	
 }
-
-*sin=current_sin;
-*cos=current_cos;
-
-}
-
-
-
