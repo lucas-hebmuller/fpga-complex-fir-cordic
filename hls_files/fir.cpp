@@ -92,6 +92,8 @@ void top_cordic_rotater(hls::stream<int>& input_img, hls::stream<int>& input_rea
     float* output_img, int length)
 {
     LOOP_CORDIC_MAIN: for (int i = 0; i < length; i++) {
+#pragma HLS PIPELINE II=1
+
         // read from FIFO
         int temp_result_real = input_real.read();
         int temp_result_img = input_img.read();

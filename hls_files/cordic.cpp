@@ -17,28 +17,49 @@ static FIXED_POINT cordic_phase[64] =
     0.00000000000000000087,0.00000000000000000043,0.00000000000000000022,0.00000000000000000011
 };
 
-const int NUM_ITERATIONS=15;
+const int NUM_ITERATIONS = 15;
 
 void cordic_rotator(FIXED_POINT cos, FIXED_POINT sin, FIXED_POINT* magnitude, FIXED_POINT* phase)
 {
 	FIXED_POINT current_cos = cos; 		// real part
 	FIXED_POINT current_sin = sin; 		// imaginary part
 	FIXED_POINT current_theta = 0;
+	FIXED_POINT ninety = 1.5708; 		// radiance of 90 degrees
+	FIXED_POINT pi = 3.14159;
 	FIXED_POINT scaling_factor = 0.60725;
 
 	// rotate to 1st quadrant if not in 1st or 4th quadrant
 	if (current_cos < 0 && current_sin > 0) {
-		// currently in 2nd quadrant, need to rotate 90 degrees counterclockwise
+		// currently in 2nd quadrant, need to rotate 90 degrees
 		FIXED_POINT temp = current_cos;
-		current_cos = -current_sin; 	// x = -y
-		current_sin = current_cos;		// y = x
+		current_cos = current_sin; 		// x = y
+		current_sin = -temp;			// y = -x
+		current_theta = current_theta + ninety;
 	}
 	else if (current_cos < 0 && current_sin < 0) {
-		// currently in 3rd quadrant, need to rotate 180 degress counterclokwise
-		current_cos = -current_cos;
-		current_sin = -current_sin;
+		// currently in 3rd quadrant, need to rotate 180 degrees
+		current_cos = -current_cos;		// x = -x
+		current_sin = -current_sin;		// y = -y
+		current_theta = current_theta + pi;
 	}
 
+	// cordic method
+	for (int i = 0; i < NUM_ITERATIONS; i++) {
+		FIXED_POINT cos_shift = current_cos >> i;
+		FIXED_POINT sin_shift = current_sin >> i;
 
-	
+		if (current_sin >= 0) { // y is positive, rotate clockwise
+			current_cos = current_cos + sin_shift;
+			current_sin = current_sin - cos_shift;
+			current_theta = current_theta + cordic_phase[i];
+		}
+		else { // y is negative, rotate counterclockwise
+			current_cos = current_cos - sin_shift;
+			current_sin = current_sin + cos_shift;
+			current_theta = current_theta - cordic_phase[i];
+		}
+	}
+
+	*magnitude = current_cos * scaling_factor; // only this multiplication is allowed
+	*phase = current_theta;
 }
