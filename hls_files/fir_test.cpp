@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "fir.h"
 
-#define LENGTH 25
+const int LENGTH = 25;
 
 int main() {
     int coef_real[KERNEL_SIZE] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25};
@@ -13,15 +13,15 @@ int main() {
     //int input_img[KERNEL_SIZE] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
     int input_img[KERNEL_SIZE] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-    float output_real[LENGTH]; // magnitude
-    float output_img[LENGTH];  // phase
+    float output_magnitude[LENGTH]; // output_real
+    float output_phase[LENGTH];     // output_img
 
     int length = LENGTH;
 
-    fpga417_fir(input_real, input_img, coef_real, coef_img, output_img, output_real, length);
+    fpga417_fir(input_real, input_img, coef_real, coef_img, output_magnitude, output_phase, length);
 
     for (int i = 0; i < LENGTH; i++) {
-        printf("output %d mag: %f  phase: %f \n", i, output_real[i], output_img[i]);
+        printf("OUTPUT %d: mag = %.6f      phase = %.6f \n", i, output_magnitude[i], output_phase[i]);
     }
 
     return 0;

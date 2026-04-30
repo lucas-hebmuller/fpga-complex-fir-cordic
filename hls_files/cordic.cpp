@@ -24,11 +24,11 @@ void cordic_rotator(FIXED_POINT cos, FIXED_POINT sin, FIXED_POINT* magnitude, FI
 	FIXED_POINT current_cos = cos; 		// real part
 	FIXED_POINT current_sin = sin; 		// imaginary part
 	FIXED_POINT current_theta = 0;
-	FIXED_POINT ninety = 1.5708; 		// radiance of 90 degrees
-	FIXED_POINT pi = 3.14159;
+	FIXED_POINT ninety = 1.570796;   // radiance of 90 degrees
+	FIXED_POINT pi = 3.141593;
 	FIXED_POINT scaling_factor = 0.60725;
 
-	// rotate to 1st quadrant if not in 1st or 4th quadrant
+	// rotate to 1st quadrant if not in it
 	if (current_cos < 0 && current_sin > 0) {
 		// currently in 2nd quadrant, need to rotate 90 degrees
 		FIXED_POINT temp = current_cos;
@@ -41,6 +41,13 @@ void cordic_rotator(FIXED_POINT cos, FIXED_POINT sin, FIXED_POINT* magnitude, FI
 		current_cos = -current_cos;		// x = -x
 		current_sin = -current_sin;		// y = -y
 		current_theta = current_theta + pi;
+	}
+	else if (current_cos > 0 && current_sin < 0) {
+		// currently in 4th quadrant, need to rotate 90 degrees counterclockwise
+		FIXED_POINT temp = current_cos;
+		current_cos = -current_sin;		// x = -y
+		current_sin = temp;				// y = x;
+		current_theta = current_theta - ninety;
 	}
 
 	// cordic method
