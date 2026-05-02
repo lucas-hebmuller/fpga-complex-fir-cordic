@@ -5,12 +5,12 @@ void fpga417_fir(int* input_real, int* input_img, int* coef_real, int* coef_img,
     float* output_phase, int input_length) 
 {
 #pragma HLS INTERFACE mode=s_axilite port=return bundle=BUS_A
-#pragma HLS INTERFACE mode=m_axi port=input_real        offset=slave bundle=gmem0
-#pragma HLS INTERFACE mode=m_axi port=input_img         offset=slave bundle=gmem1
-#pragma HLS INTERFACE mode=m_axi port=coef_real         offset=slave bundle=gmem2
-#pragma HLS INTERFACE mode=m_axi port=coef_img          offset=slave bundle=gmem3
-#pragma HLS INTERFACE mode=m_axi port=output_magnitude  offset=slave bundle=gmem4
-#pragma HLS INTERFACE mode=m_axi port=output_phase      offset=slave bundle=gmem5
+#pragma HLS INTERFACE mode=m_axi port=input_real        depth=KERNEL_SIZE offset=slave bundle=gmem0
+#pragma HLS INTERFACE mode=m_axi port=input_img         depth=KERNEL_SIZE offset=slave bundle=gmem1
+#pragma HLS INTERFACE mode=m_axi port=coef_real         depth=KERNEL_SIZE offset=slave bundle=gmem2
+#pragma HLS INTERFACE mode=m_axi port=coef_img          depth=KERNEL_SIZE offset=slave bundle=gmem3
+#pragma HLS INTERFACE mode=m_axi port=output_magnitude  depth=KERNEL_SIZE offset=slave bundle=gmem4
+#pragma HLS INTERFACE mode=m_axi port=output_phase      depth=KERNEL_SIZE offset=slave bundle=gmem5
 #pragma HLS INTERFACE mode=s_axilite port=input_length
 
 int kernel_real[KERNEL_SIZE];
@@ -52,14 +52,14 @@ void top_fir(int* input_real, int* input_img, int kernel_real[KERNEL_SIZE], int 
 void fir(int input_real, int input_img, int kernel_real[KERNEL_SIZE], int kernel_img[KERNEL_SIZE], 
     int shift_reg_real[KERNEL_SIZE], int shift_reg_img[KERNEL_SIZE], int* output_real, int* output_img) 
 {
-#pragma HLS ARRAY_PARTITION variable=shift_reg_real type=cyclic factor=7
-#pragma HLS ARRAY_PARTITION variable=shift_reg_img  type=cyclic factor=7
-#pragma HLS ARRAY_PARTITION variable=kernel_real    type=cyclic factor=7
-#pragma HLS ARRAY_PARTITION variable=kernel_img     type=cyclic factor=7
+#pragma HLS ARRAY_PARTITION variable=shift_reg_real type=cyclic factor=5
+#pragma HLS ARRAY_PARTITION variable=shift_reg_img  type=cyclic factor=5
+#pragma HLS ARRAY_PARTITION variable=kernel_real    type=cyclic factor=5
+#pragma HLS ARRAY_PARTITION variable=kernel_img     type=cyclic factor=5
 
     SHIFT_LOOP: for (int i = KERNEL_SIZE - 1; i > 0; i--) {
 #pragma HLS PIPELINE II=1
-#pragma HLS UNROLL factor=7
+#pragma HLS UNROLL factor=5
 
         shift_reg_real[i] = shift_reg_real[i - 1];
         shift_reg_img[i] = shift_reg_img[i - 1];
@@ -75,7 +75,7 @@ void fir(int input_real, int input_img, int kernel_real[KERNEL_SIZE], int kernel
     // A = shift_reg_real, a = shift_reg_img, B = kernel_real, b = kernel_img
     ACC_LOOP: for (int i = 0; i < KERNEL_SIZE; i++) {
 #pragma HLS PIPELINE II=1
-#pragma HLS UNROLL factor=7
+#pragma HLS UNROLL factor=5
 
         acc_real += shift_reg_real[i] * kernel_real[i]
                     - shift_reg_img[i] * kernel_img[i];
