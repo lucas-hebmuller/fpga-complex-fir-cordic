@@ -16,9 +16,7 @@ int main() {
     float output_magnitude[LENGTH]; // output_real
     float output_phase[LENGTH];     // output_img
 
-    int length = LENGTH;
-
-    fpga417_fir(input_real, input_img, coef_real, coef_img, output_magnitude, output_phase, length);
+    fpga417_fir(input_real, input_img, coef_real, coef_img, output_magnitude, output_phase, LENGTH);
 
     for (int i = 0; i < LENGTH; i++) {
         printf("OUTPUT %d: mag = %.6f      phase = %.6f \n", i, output_magnitude[i], output_phase[i]);
